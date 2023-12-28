@@ -13,6 +13,9 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import Markdown from "react-markdown";
 
 import { useNavigate } from "react-router-dom";
 import DoubleArrowIcon from "@mui/icons-material/DoubleArrow";
@@ -39,6 +42,61 @@ const fetchPosts = async (offset, callback) => {
   } catch (error) {
     throw error;
   }
+};
+
+export const MainPagePost = ({ post, disablebuttons }) => {
+  const navigateTo = useNavigate();
+
+  const didSlice = post.description.length >= 150;
+  const description = post.description
+    .slice(0, 150)
+    .concat(didSlice ? "..." : "");
+
+  return (
+    <Paper variant="outlined" sx={{ width: 500 }}>
+      <Grid container item direction="column">
+        <Grid item>
+          <img
+            onClick={() => navigateTo(post.id)}
+            src={post.imageURL}
+            alt=""
+            style={{ maxWidth: "100%", cursor: "pointer" }}
+          />
+          <div style={{ padding: "0 8px 8px 8px" }}>
+            <Typography variant="h5" fontWeight={600}>
+              {post.title}
+            </Typography>
+            <Typography variant="body1" style={{ marginTop: 8 }}>
+              {dayjs(post.createdAt).format("MMMM DD, YYYY")}
+            </Typography>
+          </div>
+        </Grid>
+        <Grid item>
+          <Divider />
+        </Grid>
+        <Grid item style={{ padding: 8 }}>
+          <Markdown
+            className="markdown"
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw]}
+            components={{
+              p: (props) => <Typography {...props} />,
+            }}
+          >
+            {description}
+          </Markdown>
+          {didSlice ? (
+            <Button
+              endIcon={<DoubleArrowIcon />}
+              onClick={() => (disablebuttons ? null : navigateTo(post.id))}
+            >
+              Read more
+            </Button>
+          ) : null}
+        </Grid>
+      </Grid>
+    </Paper>
+  );
 };
 
 export const Posts = () => {
@@ -117,57 +175,33 @@ export const Posts = () => {
     }
   };
 
-  const editPost = (inputs) => {
-    console.log(inputs);
+  const editPost = async (inputs) => {
+    try {
+      const edited = await axios.patch(
+        `http://localhost:3000/api/blog_posts/${inputs.id}`,
+        inputs,
+        {
+          headers: {
+            authorization: window.localStorage.getItem("token"),
+          },
+        }
+      );
+
+      setPosts(posts.map((p) => (p.id === edited.id ? edited : p)));
+      setEditModalOpen(null);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
     <Grid container item direction="column" alignItems="center" spacing={4}>
       {posts.map((post, index) => {
-        const description = post.description.slice(0, 150);
-        const didSlice = post.description.length >= 150;
-
         return (
           <Grid item key={post.id}>
             <Grid container item>
-              <Paper variant="outlined" sx={{ width: 500 }}>
-                <Grid container item direction="column">
-                  <Grid item>
-                    <img
-                      onClick={() => navigateTo(post.id)}
-                      src={post.imageURL}
-                      alt=""
-                      style={{ maxWidth: "100%", cursor: "pointer" }}
-                    />
-                    <div style={{ padding: "0 8px 8px 8px" }}>
-                      <Typography variant="h5" fontWeight={600}>
-                        {post.title}
-                      </Typography>
-                      <Typography variant="body1" style={{ marginTop: 8 }}>
-                        {dayjs(post.createdAt).format("MMMM DD, YYYY")}
-                      </Typography>
-                    </div>
-                  </Grid>
-                  <Grid item>
-                    <Divider />
-                  </Grid>
-                  <Grid item style={{ padding: 8 }}>
-                    <Typography>
-                      {description}
-                      {didSlice ? "..." : ""}
-                    </Typography>
-                    {didSlice ? (
-                      <Button
-                        endIcon={<DoubleArrowIcon />}
-                        onClick={() => navigateTo(post.id)}
-                      >
-                        Read more
-                      </Button>
-                    ) : null}
-                  </Grid>
-                </Grid>
-                <div ref={index === posts.length - 1 ? ref : null} />
-              </Paper>
+              <MainPagePost post={post} />
+              <div ref={index === posts.length - 1 ? ref : null} />
               <Grid item>
                 <IconButton onClick={() => setEditModalOpen(post)}>
                   <EditIcon />

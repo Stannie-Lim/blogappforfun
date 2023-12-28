@@ -12,6 +12,9 @@ import axios from "axios";
 import dayjs from "dayjs";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import Markdown from "react-markdown";
 
 import { NotFound } from "./NotFound";
 
@@ -66,7 +69,16 @@ export const SingleBlogPost = () => {
             <Divider />
           </Grid>
           <Grid item>
-            <Typography>{current.description}</Typography>
+            <Markdown
+              className="markdown"
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeRaw]}
+              components={{
+                p: (props) => <Typography {...props} />,
+              }}
+            >
+              {current.description}
+            </Markdown>
           </Grid>
           <Grid
             container

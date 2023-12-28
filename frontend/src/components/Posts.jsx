@@ -9,6 +9,9 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import DoubleArrowIcon from "@mui/icons-material/DoubleArrow";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import Markdown from "react-markdown";
 
 import axios from "axios";
 import dayjs from "dayjs";
@@ -89,8 +92,10 @@ export const Posts = () => {
   return (
     <Grid container item direction="column" alignItems="center" spacing={4}>
       {posts.map((post, index) => {
-        const description = post.description.slice(0, 150);
         const didSlice = post.description.length >= 150;
+        const description = post.description
+          .slice(0, 150)
+          .concat(didSlice ? "..." : "");
 
         return (
           <Grid item key={post.id}>
@@ -116,10 +121,16 @@ export const Posts = () => {
                   <Divider />
                 </Grid>
                 <Grid item style={{ padding: 8 }}>
-                  <Typography>
+                  <Markdown
+                    className="markdown"
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeRaw]}
+                    components={{
+                      p: (props) => <Typography {...props} />,
+                    }}
+                  >
                     {description}
-                    {didSlice ? "..." : ""}
-                  </Typography>
+                  </Markdown>
                   {didSlice ? (
                     <Button
                       endIcon={<DoubleArrowIcon />}

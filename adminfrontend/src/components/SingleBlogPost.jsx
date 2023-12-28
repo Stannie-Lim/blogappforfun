@@ -10,11 +10,16 @@ import {
 import axios from "axios";
 import dayjs from "dayjs";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import Markdown from "react-markdown";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 
-export const SingleBlogPost = () => {
+import "./SingleBlogPost.css";
+
+export const SingleBlogPost = ({ inputPost }) => {
   const [post, setPost] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!inputPost);
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -33,28 +38,30 @@ export const SingleBlogPost = () => {
       setLoading(false);
     };
 
-    getPost();
-  }, [id]);
+    if (!inputPost) {
+      getPost();
+    }
+  }, [id, inputPost]);
 
   if (loading) {
     return <CircularProgress />;
   }
 
-  if (!post.current) {
-    return <NotFound />;
-  }
+  const { prev, next } = post || inputPost;
 
-  const { prev, current, next } = post;
+  const current = inputPost ? inputPost : post.current;
 
   return (
     <Grid container direction="column">
       <Grid container item alignItems="center" direction="column">
         <Grid container item spacing={3} style={{ width: 700, padding: 8 }}>
-          <Grid item>
-            <Button onClick={() => navigate("/homepage")}>
-              Go back to homepage
-            </Button>
-          </Grid>
+          {!inputPost && (
+            <Grid item>
+              <Button onClick={() => navigate("/blog")}>
+                Go back to homepage
+              </Button>
+            </Grid>
+          )}
           <Grid item>
             <Typography variant="h5" fontWeight={600}>
               {current.title}
@@ -67,7 +74,16 @@ export const SingleBlogPost = () => {
             <Divider />
           </Grid>
           <Grid item>
-            <Typography>{current.description}</Typography>
+            <Markdown
+              className="markdown"
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeRaw]}
+              components={{
+                p: (props) => <Typography {...props} />,
+              }}
+            >
+              {current.description}
+            </Markdown>
           </Grid>
           <Grid
             container

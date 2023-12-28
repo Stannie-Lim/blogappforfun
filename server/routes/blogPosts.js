@@ -48,7 +48,6 @@ router.get("/:id", async (req, res, next) => {
 });
 
 router.delete("/:id", isAdmin, async (req, res, next) => {
-  console.log(req.params.id);
   try {
     await prisma.post.delete({
       where: {
@@ -56,6 +55,21 @@ router.delete("/:id", isAdmin, async (req, res, next) => {
       },
     });
     res.sendStatus(204);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.patch("/:id", isAdmin, async (req, res, next) => {
+  try {
+    const updated = await prisma.post.update({
+      data: req.body,
+      where: {
+        id: req.params.id,
+      },
+    });
+
+    res.send(updated);
   } catch (error) {
     next(error);
   }

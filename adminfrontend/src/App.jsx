@@ -78,7 +78,7 @@ function App() {
 
         setUser(user);
 
-        navigate("/homepage");
+        navigate("/blog");
       }
     };
 
@@ -112,7 +112,7 @@ function App() {
 
       setUser(user);
 
-      navigate("/homepage");
+      navigate("/blog");
     } catch (error) {
       console.log(error);
     }
@@ -124,7 +124,7 @@ function App() {
       <Routes>
         {user ? (
           <>
-            <Route path="/homepage" element={<AdminPage />} />
+            <Route path="/blog" element={<AdminPage />} />
             <Route path="/blog/:id" element={<SingleBlogPost />} />
           </>
         ) : (
