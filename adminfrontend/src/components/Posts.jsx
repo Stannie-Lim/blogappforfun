@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import DoubleArrowIcon from "@mui/icons-material/DoubleArrow";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import AddIcon from "@mui/icons-material/Add";
 import { UserContext } from "../UserContext";
 
 import axios from "axios";
@@ -57,7 +58,7 @@ export const MainPagePost = ({ post, disablebuttons }) => {
       <Grid container item direction="column">
         <Grid item>
           <img
-            onClick={() => navigateTo(post.id)}
+            onClick={() => (disablebuttons ? null : navigateTo(post.id))}
             src={post.imageURL}
             alt=""
             style={{ maxWidth: "100%", cursor: "pointer" }}
@@ -106,6 +107,7 @@ export const Posts = () => {
   const [shouldFetch, setShouldFetch] = useState(true);
   const [deleteModalOpen, setDeleteModalOpen] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -194,8 +196,17 @@ export const Posts = () => {
     }
   };
 
+  const createPost = async (inputs) => {
+    console.log(inputs);
+  };
+
   return (
     <Grid container item direction="column" alignItems="center" spacing={4}>
+      <Grid item>
+        <Button onClick={() => setCreateModalOpen(true)} endIcon={<AddIcon />}>
+          Create post
+        </Button>
+      </Grid>
       {posts.map((post, index) => {
         return (
           <Grid item key={post.id}>
@@ -216,6 +227,14 @@ export const Posts = () => {
           </Grid>
         );
       })}
+
+      {createModalOpen && (
+        <PostModal
+          onClose={() => setCreateModalOpen(false)}
+          post={editModalOpen}
+          onSubmit={(inputs) => createPost(inputs)}
+        />
+      )}
 
       {editModalOpen && (
         <PostModal

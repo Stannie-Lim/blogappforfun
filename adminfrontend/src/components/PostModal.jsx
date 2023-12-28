@@ -13,7 +13,12 @@ import { MainPagePost } from "./Posts";
 import { SingleBlogPost } from "./SingleBlogPost";
 
 export const PostModal = ({ onClose, post, isEdit, onSubmit }) => {
-  const [inputs, setInputs] = useState(post);
+  const [inputs, setInputs] = useState(
+    post || {
+      title: "",
+      description: "",
+    }
+  );
   const [view, setView] = useState("main");
 
   const onChange = (event) => {
