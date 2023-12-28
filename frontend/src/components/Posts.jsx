@@ -1,35 +1,72 @@
-import React, { useEffect, useState } from "react";
-import { Paper, Typography, Grid, Divider } from "@mui/material";
+import React, { useEffect, useState, useRef } from "react";
+import { Paper, Typography, Grid, Divider, Container } from "@mui/material";
 import axios from "axios";
 import dayjs from "dayjs";
 
+const NUM_PER_FETCH = 3;
+
+const fetchPosts = async (offset, callback) => {
+  try {
+    const { data } = await axios.get(
+      `http://localhost:3000/api/blog_posts?limit=${NUM_PER_FETCH}&offset=${
+        offset * NUM_PER_FETCH
+      }`
+    );
+
+    callback(data);
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const Posts = () => {
   const [posts, setPosts] = useState([]);
+  const [offset, setOffset] = useState(0);
+  const [shouldFetch, setShouldFetch] = useState(true);
+
+  const ref = useRef(null);
+
+  const scrolled = async (entries) => {
+    const [entry] = entries;
+    if (entry.isIntersecting) {
+      setOffset(offset + 1);
+    }
+  };
+  const observer = new IntersectionObserver(scrolled);
+
+  useEffect(() => {
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.unobserve(ref?.current);
+  }, [ref, posts]);
 
   useEffect(() => {
     const getPosts = async () => {
-      try {
-        const { data } = await axios.get(
-          "http://localhost:3000/api/blog_posts"
-        );
-        setPosts(data);
-      } catch (error) {
-        console.log(error);
+      if (shouldFetch) {
+        try {
+          await fetchPosts(offset, (data) => {
+            const { posts: fetchedPosts, hasNext } = data;
+
+            if (!hasNext) {
+              setShouldFetch(false);
+              observer.unobserve(ref?.current);
+            }
+            setPosts([...posts, ...fetchedPosts]);
+          });
+        } catch (error) {
+          console.log(error);
+        }
       }
     };
 
     getPosts();
-  }, []);
+  }, [offset]);
 
   return (
-    <Grid
-      container
-      style={{ border: "1px solid black", padding: "32px 0" }}
-      direction="column"
-      alignItems="center"
-      spacing={4}
-    >
-      {posts.map((post) => (
+    <Grid container item direction="column" alignItems="center" spacing={4}>
+      {posts.map((post, index) => (
         <Grid item key={post.id}>
           <Paper variant="outlined" sx={{ width: 500 }}>
             <Grid container item direction="column">
@@ -51,6 +88,7 @@ export const Posts = () => {
                 <Typography>{post.description}</Typography>
               </Grid>
             </Grid>
+            <div ref={index === posts.length - 1 ? ref : null} />
           </Paper>
         </Grid>
       ))}

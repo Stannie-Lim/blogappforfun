@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Typography } from "@mui/material";
+import { Typography, Grid } from "@mui/material";
 
 import { Posts } from "./Posts";
 
@@ -8,14 +8,14 @@ const BANNER_IMAGE =
 
 const Banner = () => {
   return (
-    <>
+    <div style={{ marginBottom: 265 }}>
       <div
         style={{
+          height: 300,
           position: "absolute",
           top: 0,
           zIndex: -1,
           width: "100%",
-          height: 300,
           backgroundImage: `url(${BANNER_IMAGE})`,
           backgroundSize: "cover",
           backgroundRepeat: "no-repeat",
@@ -37,16 +37,17 @@ const Banner = () => {
           Blog
         </Typography>
       </div>
-      <div style={{ marginBottom: 235 }} />
-    </>
+    </div>
   );
 };
 
 export const Blog = () => {
   return (
-    <div>
+    <Grid container direction="column">
       <Banner />
-      <Posts />
-    </div>
+      <Grid item>
+        <Posts />
+      </Grid>
+    </Grid>
   );
 };
