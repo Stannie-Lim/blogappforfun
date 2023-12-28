@@ -12,6 +12,9 @@ const theme = createTheme({
     allVariants: {
       color: "#4a4a4a",
     },
+    button: {
+      textTransform: "none",
+    },
   },
 });
 

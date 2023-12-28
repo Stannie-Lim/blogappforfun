@@ -6,7 +6,7 @@ import { Posts } from "./Posts";
 const BANNER_IMAGE =
   "https://www.luxlvl.com/our-blog/wp-content/uploads/sites/3/2021/03/Bell-Canyon-Real-Estate-Twilight.jpg";
 
-const Banner = () => {
+export const Banner = () => {
   return (
     <div style={{ marginBottom: 265 }}>
       <div

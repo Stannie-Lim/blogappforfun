@@ -1,5 +1,15 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Paper, Typography, Grid, Divider, Container } from "@mui/material";
+import {
+  Paper,
+  Typography,
+  Grid,
+  Divider,
+  Container,
+  Button,
+} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import DoubleArrowIcon from "@mui/icons-material/DoubleArrow";
+
 import axios from "axios";
 import dayjs from "dayjs";
 
@@ -23,6 +33,7 @@ export const Posts = () => {
   const [posts, setPosts] = useState([]);
   const [offset, setOffset] = useState(0);
   const [shouldFetch, setShouldFetch] = useState(true);
+  const navigate = useNavigate();
 
   const ref = useRef(null);
 
@@ -39,7 +50,11 @@ export const Posts = () => {
       observer.observe(ref.current);
     }
 
-    return () => observer.unobserve(ref?.current);
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current);
+      }
+    };
   }, [ref, posts]);
 
   useEffect(() => {
@@ -51,7 +66,10 @@ export const Posts = () => {
 
             if (!hasNext) {
               setShouldFetch(false);
-              observer.unobserve(ref?.current);
+
+              if (ref.current) {
+                observer.unobserve(ref.current);
+              }
             }
             setPosts([...posts, ...fetchedPosts]);
           });
@@ -64,34 +82,59 @@ export const Posts = () => {
     getPosts();
   }, [offset]);
 
+  const navigateTo = (postId) => {
+    navigate("/blog/" + postId);
+  };
+
   return (
     <Grid container item direction="column" alignItems="center" spacing={4}>
-      {posts.map((post, index) => (
-        <Grid item key={post.id}>
-          <Paper variant="outlined" sx={{ width: 500 }}>
-            <Grid container item direction="column">
-              <Grid item>
-                <img src={post.imageURL} alt="" style={{ maxWidth: "100%" }} />
-                <div style={{ padding: "0 8px 8px 8px" }}>
-                  <Typography variant="h5" fontWeight={600}>
-                    {post.title}
+      {posts.map((post, index) => {
+        const description = post.description.slice(0, 150);
+        const didSlice = post.description.length >= 150;
+
+        return (
+          <Grid item key={post.id}>
+            <Paper variant="outlined" sx={{ width: 500 }}>
+              <Grid container item direction="column">
+                <Grid item>
+                  <img
+                    onClick={() => navigateTo(post.id)}
+                    src={post.imageURL}
+                    alt=""
+                    style={{ maxWidth: "100%", cursor: "pointer" }}
+                  />
+                  <div style={{ padding: "0 8px 8px 8px" }}>
+                    <Typography variant="h5" fontWeight={600}>
+                      {post.title}
+                    </Typography>
+                    <Typography variant="body1" style={{ marginTop: 8 }}>
+                      {dayjs(post.createdAt).format("MMMM DD, YYYY")}
+                    </Typography>
+                  </div>
+                </Grid>
+                <Grid item>
+                  <Divider />
+                </Grid>
+                <Grid item style={{ padding: 8 }}>
+                  <Typography>
+                    {description}
+                    {didSlice ? "..." : ""}
                   </Typography>
-                  <Typography variant="body1" style={{ marginTop: 8 }}>
-                    {dayjs(post.createdAt).format("MMMM DD, YYYY")}
-                  </Typography>
-                </div>
+                  {didSlice ? (
+                    <Button
+                      endIcon={<DoubleArrowIcon />}
+                      onClick={() => navigateTo(post.id)}
+                    >
+                      Read more
+                    </Button>
+                  ) : null}
+                </Grid>
               </Grid>
-              <Grid item>
-                <Divider />
-              </Grid>
-              <Grid item style={{ padding: 8 }}>
-                <Typography>{post.description}</Typography>
-              </Grid>
-            </Grid>
-            <div ref={index === posts.length - 1 ? ref : null} />
-          </Paper>
-        </Grid>
-      ))}
+              <div ref={index === posts.length - 1 ? ref : null} />
+            </Paper>
+          </Grid>
+        );
+      })}
     </Grid>
   );
 };

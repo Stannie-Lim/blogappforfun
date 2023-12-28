@@ -11,9 +11,18 @@ datasource db {
 }
 
 model post {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(uuid())
   title       String
   description String
   createdAt   DateTime
   imageURL    String
+  user        users?   @relation(fields: [userId], references: [id])
+  userId      String?
+}
+
+model users {
+  id       String @id @default(uuid())
+  username String @unique
+  password String
+  post     post[]
 }

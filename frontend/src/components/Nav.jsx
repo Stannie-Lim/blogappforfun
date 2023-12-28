@@ -15,10 +15,14 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
+import BookIcon from "@mui/icons-material/Book";
+
+import { useNavigate } from "react-router-dom";
 
 export const Nav = () => {
   const anchor = "right";
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleDrawer = (anchor, open) => (event) => {
     if (
@@ -31,6 +35,17 @@ export const Nav = () => {
     setIsOpen(open);
   };
 
+  const onSelect = (value) => {
+    switch (value) {
+      case "Blog":
+        navigate("/blog");
+        break;
+      case "Home":
+        navigate("/");
+        break;
+    }
+  };
+
   return (
     <>
       <Box sx={{ flexGrow: 1, zIndex: 1 }}>
@@ -40,7 +55,12 @@ export const Nav = () => {
           sx={{ backgroundColor: "rgba(0, 0, 0, 0.3)", color: "white" }}
         >
           <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-            <Typography variant="h6" component="div" sx={{ color: "white" }}>
+            <Typography
+              variant="h6"
+              component="div"
+              sx={{ color: "white", cursor: "pointer" }}
+              onClick={() => onSelect("Home")}
+            >
               Blog App
             </Typography>
             <IconButton
@@ -74,10 +94,14 @@ export const Nav = () => {
         >
           <List>
             {["Blog"].map((text, index) => (
-              <ListItem key={text} disablePadding>
+              <ListItem
+                key={text}
+                disablePadding
+                onClick={() => onSelect(text)}
+              >
                 <ListItemButton>
                   <ListItemIcon>
-                    {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                    <BookIcon />
                   </ListItemIcon>
                   <ListItemText primary={text} />
                 </ListItemButton>
